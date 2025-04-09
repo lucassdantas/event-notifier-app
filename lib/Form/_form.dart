@@ -9,6 +9,8 @@ class FormAddNewEvent extends StatefulWidget {
 
 class _FormAddNewEventState extends State<FormAddNewEvent> {
   final _formKey = GlobalKey<FormState>();
+  TextEditingController eventDateController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -24,15 +26,18 @@ class _FormAddNewEventState extends State<FormAddNewEvent> {
               return null;
             },
           ),
-          InputDatePickerFormField(
-            firstDate: DateTime(1969, 1, 1),
-            lastDate: DateTime(2100),
-          ),
           TextFormField(
-            decoration: InputDecoration(hintText: 'Nome do evento'),
+            controller: eventDateController,
+
+            decoration: InputDecoration(
+              hintText: 'Data do evento',
+              prefixIcon: Icon(Icons.calendar_month),
+            ),
+            onTap: () => _selectDate(),
+            readOnly: true,
             validator: (String? value) {
               if (value == null || value.isEmpty) {
-                return 'Preencha o nome do evento';
+                return 'Preencha a data do evento';
               }
               return null;
             },
@@ -40,5 +45,19 @@ class _FormAddNewEventState extends State<FormAddNewEvent> {
         ],
       ),
     );
+  }
+
+  Future<void> _selectDate() async {
+    DateTime? choosenDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(3000),
+    );
+    if (choosenDate != null) {
+      setState(
+        () => eventDateController.text = choosenDate.toString().split(' ')[0],
+      );
+    }
   }
 }
