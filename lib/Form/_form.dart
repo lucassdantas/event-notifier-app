@@ -1,8 +1,11 @@
+import 'package:event_notifier/Event/_event.dart';
 import 'package:flutter/material.dart';
 
 class FormAddNewEvent extends StatefulWidget {
-  final void Function(Map<String, dynamic>) onAddEvent;
-  const FormAddNewEvent({super.key, required this.onAddEvent});
+  final Event? event;
+  final void Function(Event newEvent) onSubmit;
+
+  const FormAddNewEvent({super.key, this.event, required this.onSubmit});
 
   @override
   State<FormAddNewEvent> createState() => _FormAddNewEventState();
@@ -10,89 +13,106 @@ class FormAddNewEvent extends StatefulWidget {
 
 class _FormAddNewEventState extends State<FormAddNewEvent> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController titleController = TextEditingController();
-  TextEditingController eventDateController = TextEditingController();
-  TextEditingController notificationDateController = TextEditingController();
+  late TextEditingController titleController;
+  late TextEditingController eventDateController;
+  late TextEditingController notificationDateController;
+
+  @override
+  void initState() {
+    super.initState();
+    titleController = TextEditingController(text: widget.event?.title ?? '');
+    eventDateController = TextEditingController(
+      text: widget.event?.eventDate.toString().split(' ')[0] ?? '',
+    );
+    notificationDateController = TextEditingController(
+      text: widget.event?.notificationDate.toString().split(' ')[0] ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    eventDateController.dispose();
+    notificationDateController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           TextFormField(
             controller: titleController,
             decoration: InputDecoration(hintText: 'Nome do evento'),
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Preencha o nome do evento';
-              }
-              return null;
-            },
+            validator:
+                (value) =>
+                    value == null || value.isEmpty ? 'Campo obrigatório' : null,
           ),
           TextFormField(
             controller: eventDateController,
             decoration: InputDecoration(
               hintText: 'Data do evento',
-              prefixIcon: Icon(Icons.calendar_month),
+              prefixIcon: Icon(Icons.calendar_today),
             ),
-            onTap: () => _selectEventDate(),
+            onTap: _selectEventDate,
             readOnly: true,
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Preencha a data do evento';
-              }
-              return null;
-            },
           ),
           TextFormField(
             controller: notificationDateController,
             decoration: InputDecoration(
               hintText: 'Data da notificação',
-              prefixIcon: Icon(Icons.calendar_month),
+              prefixIcon: Icon(Icons.notifications),
             ),
-            onTap: () => _selectNotificationDate(),
+            onTap: _selectNotificationDate,
             readOnly: true,
-            validator: (String? value) {
-              if (value == null || value.isEmpty) {
-                return 'Preencha a data do evento';
-              }
-              return null;
-            },
           ),
-          ElevatedButton(onPressed: () {}, child: Text('Adicionar evento')),
+          ElevatedButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                final newEvent = Event(
+                  titleController.text,
+                  DateTime.parse(eventDateController.text),
+                  DateTime.parse(notificationDateController.text),
+                );
+                widget.onSubmit(newEvent);
+                Navigator.of(context).pop(); // Fecha o diálogo
+              }
+            },
+            child: Text(widget.event == null ? 'Adicionar' : 'Salvar'),
+          ),
         ],
       ),
     );
   }
 
   Future<void> _selectEventDate() async {
-    DateTime? choosenDate = await showDatePicker(
+    DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: widget.event?.eventDate ?? DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(3000),
+      lastDate: DateTime(2100),
     );
-    if (choosenDate != null) {
-      setState(
-        () => eventDateController.text = choosenDate.toString().split(' ')[0],
-      );
+    if (picked != null) {
+      setState(() {
+        eventDateController.text = picked.toString().split(' ')[0];
+      });
     }
   }
 
   Future<void> _selectNotificationDate() async {
-    DateTime? choosenDate = await showDatePicker(
+    DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: widget.event?.notificationDate ?? DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(3000),
+      lastDate: DateTime(2100),
     );
-    if (choosenDate != null) {
-      setState(
-        () =>
-            notificationDateController.text =
-                choosenDate.toString().split(' ')[0],
-      );
+    if (picked != null) {
+      setState(() {
+        notificationDateController.text = picked.toString().split(' ')[0];
+      });
     }
   }
 }
