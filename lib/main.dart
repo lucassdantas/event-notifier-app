@@ -2,8 +2,11 @@ import 'package:event_notifier/Event/_event.dart';
 import 'package:flutter/material.dart';
 import 'package:event_notifier/Event/_event_list.dart';
 import 'package:event_notifier/Dialog/_dialog.dart';
+import 'package:event_notifier/services/_notification.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.init();
   runApp(const MyApp());
 }
 
