@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:event_notifier/Event/_event.dart';
 import 'package:event_notifier/Dialog/_dialog.dart';
 
 void main() {
@@ -30,24 +31,29 @@ class MyHomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('Event Notifier'),
       ),
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      body: Column(
         children: [
-          TextButton(
-            onPressed: () {
-              newEventDialog(context);
-            },
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(Colors.blue),
-            ),
-            child: Text(
-              'Adicionar novo evento',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextButton(
+                onPressed: () {
+                  newEventDialog(context);
+                },
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(Colors.blue),
+                ),
+                child: Text(
+                  'Adicionar novo evento',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
+          Expanded(child: Event()),
         ],
       ),
     );
